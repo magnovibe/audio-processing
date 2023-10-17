@@ -1,8 +1,12 @@
+## In future, use python3.11 not python3
+## python3.11 -m pip install librosa
+
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
+import numpy as np
 
-audio_file = "your_audio_file.wav"  # Replace with the path to your audio file
+audio_file = "jazztheme.mp3"  # Replace with the path to your audio file
 y, sr = librosa.load(audio_file)
 
 # Compute the STFT of the audio
