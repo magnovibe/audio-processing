@@ -20,7 +20,7 @@ audio_file = "jazztheme.mp3"
 y, sr = librosa.load(audio_file)
 
 onset_env = librosa.onset.onset_strength(y=y, sr=sr)
-tempo, beats = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr)
+tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
 
 print(f"Tempo: {tempo} BPM")
 
