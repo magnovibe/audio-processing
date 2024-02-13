@@ -40,6 +40,8 @@ serialInst.baudrate = 9600 # Needs to match the baud rate in the arduino code
 serialInst.port = port_name 
 print("about to open")
 serialInst.open()
+pause = input()
 print("port opened") 
 serialInst.write(str(tempo).encode('utf-8'))
+pause1 = input()
 serialInst.close()
