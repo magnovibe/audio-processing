@@ -3,10 +3,9 @@ import librosa
 import subprocess
 import time
 import librosa.display
-import matplotlib.pyplot as plt
 import numpy as np
 
-class audio:   
+class Audio:   
       
     beatTempo = 0.0
     beatVolume = []
@@ -24,7 +23,7 @@ class audio:
         onset_env = librosa.onset.onset_strength(y=y, sr=sr)
         tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
 
-        print(f"Tempo: {tempo} BPM")
+        #print(f"Tempo: {tempo} BPM")
         self.beatTempo = tempo
 
         
@@ -70,6 +69,7 @@ class audio:
 
     # Getter for mp3 tempo
     def getTempo(self):
+
         return self.beatTempo
     
 
