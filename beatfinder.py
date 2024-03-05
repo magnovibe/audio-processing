@@ -17,11 +17,21 @@ serialInst = serial.Serial()
 portList = []
 count = 0
 
+# for getting audio file initialized in code
 audio = input("Enter audio file: ")
 song = Audio(audio)
-song.calcTempo()
-tempo = song.getTempo()
+tempo = song.beatTempo
+vol = song.beatVolume
+beats = song.beatStep
+# general testing
 print("Tempo: " + str(tempo))
+print("Volume: " + str(vol))
+print("Beats: " + str(beats))
+song.magStrengthVol(vol, 2)
+
+for i in range(20):
+    song.magStrengthVol(vol, i)
+
 
 #establish serial connection
 for onePort in ports: 

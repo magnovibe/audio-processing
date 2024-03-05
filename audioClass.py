@@ -5,15 +5,20 @@ import time
 import librosa.display
 import numpy as np
 
-class Audio:   
+class Audio:       
       
     beatTempo = 0.0
     beatVolume = []
     beatVolumeString = ""
+    beatStep = 0.0
+    beatPerSec = 0.0
 
     # Initialize object
     def __init__(self, audioFile):
         self.audioFile = audioFile
+        self.calcTempo()
+        self.calcVolume()
+        self.calcBPS()
 
     # Get tempo as float and set to beatTempo
     def calcTempo(self):
@@ -25,6 +30,7 @@ class Audio:
 
         #print(f"Tempo: {tempo} BPM")
         self.beatTempo = tempo
+        self.beatStep = beats
 
         
     # Get array for volume and set to beatVolume
@@ -66,21 +72,25 @@ class Audio:
         self.beatVolume = volume_data
         self.beatVolumeString = volume_data_string
 
+    # Get beats per second
+    def calcBPS(self):
+        self.beatPerSec = self.beatTempo/60
 
-    # Getter for mp3 tempo
-    def getTempo(self):
+    def magStrengthVol(self, beatVol, index):
+        maxVolume = max(beatVol)
+        minVolume = min(beatVol)
+        magWithVol = (maxVolume - beatVol[index]) * ((255-80) / (maxVolume - minVolume)) + 80
+        print("mag strength w/ vol: " + str(magWithVol))
 
-        return self.beatTempo
-    
+    def magStrengthVolOB(self, beatVolOB, index):
+        maxVolume = 120
+        minVolume = 50
+        magWithVol = (maxVolume - beatVolOB[index]) * ((120-50) / (maxVolume - minVolume)) + 50
+        print("mag strength w/ vol: " + str(magWithVol))
+        #perhaps make flat 50
 
-    # Getter for volume data
-    def getVolumeData(self):
-        return self.beatVolume
-    
-    
-    # Getter for volume data string
-    def getVolumeString(self):
-        return self.beatVolumeString
+
+
 
 
         

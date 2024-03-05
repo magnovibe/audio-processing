@@ -5,6 +5,7 @@ volatile float timePerBeat = 0;
 volatile float timeOn = 0;
 volatile float timeOff = 0;
 volatile int readyToCook = 0;
+
 void setup() {
   // put your setup code here, to run once:
   // put your main code here, to run repeatedly:
@@ -53,4 +54,6 @@ if (readyToCook == 0) {
   delay(timeOn * 1000);
   analogWrite(magnetPin, 80);
   delay(timeOff * 1000);
+}
+
 }
