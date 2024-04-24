@@ -1,0 +1,24 @@
+{
+    "configurations": [
+      {
+        "name": "Arduino",
+        "includePath": [
+          "${workspaceFolder}/**",  // Include current workspace
+          "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include",  // Adjust the path based on your Arduino IDE installation
+          "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino"
+        ],
+        "browse": {
+          "path": [
+            "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino"
+          ],
+          "limitSymbolsToIncludedHeaders": true,
+          "databaseFilename": ""
+        },
+        "intelliSenseMode": "gcc-arm",
+        "compilerPath": "/usr/local/avr/bin/avr-gcc",  // Adjust the path based on your AVR GCC compiler
+        "cStandard": "c11",
+        "cppStandard": "c++17"
+      }
+    ],
+    "version": 4
+  }

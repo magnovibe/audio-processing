@@ -16,6 +16,10 @@ class Audio:
     beatTempo = 0.0
     beatVolume = []
     beatVolumeString = ""
+    bigMagArray = []
+    bigMagString = ""
+    littleMagArray = []
+    littleMagString = ""
     beatStep = 0.0
     beatPerSec = 0.0
 
@@ -46,7 +50,7 @@ class Audio:
         y, sr = librosa.load(self.audioFile)
 
         # Set signal frequency (in seconds) as once per beat
-        interval_duration = 60/self.beatTempo
+        interval_duration = 60/(self.beatTempo*2)
 
         # Calculate the total number of frames in the audio
         total_frames = len(y)
@@ -77,24 +81,72 @@ class Audio:
         
         self.beatVolume = volume_data
         self.beatVolumeString = volume_data_string
+        print(self.beatVolume);
+        print(self.beatVolumeString);
 
     # Get beats per second
     def calcBPS(self):
         self.beatPerSec = self.beatTempo/60
 
-    def magStrengthVol(self, beatVol, index):
-        maxVolume = max(beatVol)
-        minVolume = min(beatVol)
-        magWithVol = (maxVolume - beatVol[index]) * ((255-80) / (maxVolume - minVolume)) + 80
+    def magStrengthVol(self, volume):
+        mean = np.mean(self.beatVolume)
+        std = np.std(self.beatVolume)
+        lowerBound = mean - (1.5*std)
+        upperBound = mean + (1.5*std)
+        if (volume < lowerBound):
+            magWithVol = 255
+        elif (volume > upperBound):
+            magWithVol = 130
+        else:
+            magWithVol = (upperBound - volume) * ((255-130) / (upperBound - lowerBound)) + 130
         print("mag strength w/ vol: " + str(magWithVol))
+        return int(magWithVol)
 
-    def magStrengthVolOB(self, beatVolOB, index):
-        maxVolume = 120
-        minVolume = 50
-        magWithVol = (maxVolume - beatVolOB[index]) * ((120-50) / (maxVolume - minVolume)) + 50
-        print("mag strength w/ vol: " + str(magWithVol))
-        #perhaps make flat 50
+    def magStrengthVolOB(self, volume):
+        mean = np.mean(self.beatVolume)
+        std = np.std(self.beatVolume)
+        lowerBound = mean - (1.5*std)
+        upperBound = mean + (1.5*std)
+        if (volume < lowerBound):
+            magWithVol = 255
+        elif (volume > upperBound):
+            magWithVol = 130
+        else:
+            magWithVol = (upperBound - volume) * ((255-190) / (upperBound - lowerBound)) + 190
+        print("mag strength w/ vol OB: " + str(magWithVol))
+        return int(magWithVol)
 
+    def bigMagStrengthString(self, beatVolume):
+        for i in range(len(beatVolume)):
+            if i%2 == 0:
+                currVolume = beatVolume[i]
+                print(currVolume)
+                self.bigMagArray.append(self.magStrengthVol(currVolume))
+            else:
+                self.bigMagArray.append(self.magStrengthVolOB(beatVolume[i]))
+
+        # turn bigMagArray into string
+        for i in range(len(self.bigMagArray)):
+            self.bigMagString += str(self.bigMagArray[i]) + ";"
+        print("BIG MAG STRENGTH")
+        print(self.bigMagString)
+
+    def littleMagStrengthString(self, beatVolume):
+        # swap 0 and 1, 2 and 3, etc. in bigMagArray and add to littleMagArray
+        for i in range(len(beatVolume)):
+            if i%2 == 0:
+                if (i == len(beatVolume)-1):
+                    self.littleMagArray.append(self.bigMagArray[i])
+                else:
+                    self.littleMagArray.append(self.bigMagArray[i+1])
+            else:
+                self.littleMagArray.append(self.bigMagArray[i-1])
+        # turn littleMagArray into string
+        for i in range(len(self.littleMagArray)):
+            self.littleMagString += str(self.littleMagArray[i]) + ";"
+        print("LITTLE MAG STRENGTH")
+        print(self.littleMagString)
+        
     def serialEstablish(self):
         #establish serial connection
         
@@ -118,17 +170,17 @@ class Audio:
         serialInst.port = port_name 
         serialInst.open()
         pause = input()
+        #send tempo, volume array size, volume array delimited by : 
+        dataString = str(self.beatTempo) + ':' + str(len(self.beatVolume)) + ':' + self.bigMagString + ':' + self.littleMagString
 
-        #send tempo 
-        serialInst.write(str(self.beatTempo).encode('utf-8')) 
-        time.delay(5000)
-        
-        # send volume array size
-        serialInst.write(str(len(self.beatVolume)).encode('utf-8'))
-
-        # send volume array
-        serialInst.write(str(self.beatVolumeString).encode('utf-8'))
-        
+        serialInst.write(str(dataString).encode('utf-8'))
         pause1 = input()
-        serialInst.close()
 
+    def stopMusic(self): # not sure if this works, but serialEstablish fxn opens serial connection and its still open by the time we call stopMusic
+        serialInst = serial.Serial()
+        serialInst.write(str("!").encode('utf-8'))
+        serialInst.close()
+mySong = Audio('jazztheme.mp3') # should be whatever index is sent from front end
+mySong.bigMagStrengthString(mySong.beatVolume)
+mySong.littleMagStrengthString(mySong.beatVolume)
+mySong.serialEstablish()
