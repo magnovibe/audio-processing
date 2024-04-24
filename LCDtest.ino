@@ -1,12 +1,29 @@
 #include <LiquidCrystal.h>
 
+#define LEDPIN            6   // Define the pin to which the Neopixel strip is connected
+#define NUMPIXELS      60  // Define the number of Neopixels in your strip
+#define BAUDRATE 9600 // Define BAUDRATE
+
+#include <Adafruit_NeoPixel.h>
+
+#define BRIGHTNESS  100   // Set brightness (0 to 255)
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800);
+
+unsigned long previousMillis = 0;
+const unsigned long interval = 50; // Interval between color changes
+
+
 volatile int bigMagnet = 10;
 volatile int littleMagnet = 11;
 
 volatile float timePerBeat = 0;
 volatile float timeOn = 0;
 volatile float timeOff = 0;
+volatile int initFlag = 1;
 volatile int readyToCook = 0;
+volatile int lightLevel = 0;
+volatile float LEDtempo = 0;
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 volatile int *bigMagArray = nullptr;
 volatile int *littleMagArray = nullptr;
@@ -29,17 +46,31 @@ void setup() {
     delay(1000);
     lcd.clear();
     Serial.begin(9600);
+    strip.begin();
+    for(int i = 0; i < strip.numPixels();i++) {
+      strip.setPixelColor(i, strip.Color(185,36,255));
+      strip.show();
+    }
+    strip.show();  // Initialize all pixels to 'off'
 }
 void loop() {
-
-
-   String tempoString = "";
-   String volArrayLen = "";
-   String bigMagArrayString = "";
-   String littleMagArrayString = "";
-   float tempo = 0;
-   int volArrayLenNum = 0;
    int magnetPin = 10;
+   String tempoString;
+   String volArrayLen;
+   String bigMagArrayString;
+   String littleMagArrayString;
+   float tempo;
+   int volArrayLenNum;
+   if (initFlag == 1) {
+    initFlag = 0;
+    tempoString = "";
+    volArrayLen = "";
+    bigMagArrayString = "";
+    littleMagArrayString = "";
+    tempo = 0;
+    volArrayLenNum = 0;
+    magnetPin = 10;
+   } else {
   
   // put your main code here, to run repeatedly:
   digitalWrite(LED_BUILTIN, HIGH);
@@ -53,6 +84,7 @@ void loop() {
     int delimiterOne = 0;
     int delimiterTwo = 0;
     int delimiterThree = 0;
+
     
     while (dataString[delimiterOne] != ':') {
       tempoString = tempoString + dataString[delimiterOne];
@@ -142,17 +174,20 @@ void loop() {
     for (int i = 0; i < volArrayLenNum; i++) {
       Serial.print(String(bigMagArray[i]));
       if (i%2 == 0) { // "on" beat, short delay
+        unsigned long zeroTime = millis();
         analogWrite(bigMagnet, bigMagArray[i]);
         analogWrite(littleMagnet, littleMagArray[i]);
         digitalWrite(LED_BUILTIN, HIGH);
-        delay(timeOff*1000);
+        while (millis() - zeroTime < timeOff*1000) {  }
       } else {
+        unsigned long zeroTime = millis();
         analogWrite(bigMagnet, bigMagArray[i]);
         analogWrite(littleMagnet, littleMagArray[i]);
         digitalWrite(LED_BUILTIN, LOW);
-        delay(timeOn*1000);
+        while (millis() - zeroTime < timeOn*1000) {  }
+        }
       }
     }
   }
-  //PORTB &= ~(1 << PB2);
 }
+
