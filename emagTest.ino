@@ -30,7 +30,7 @@ void loop() {
 
  // code for serial... not working rn for some reason
 if (Serial.available() > 0) {
-   PORTB &= ~(1 << PB2);
+   PORTB &= !(1 << PB2);
 
    String pwm = Serial.readString();
    delay(4000);
